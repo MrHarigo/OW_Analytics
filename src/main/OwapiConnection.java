@@ -13,28 +13,25 @@ public class OwapiConnection {
 
     final private String BASE_ADDRESS = "https://owapi.net/api/v3/u/";
     final private String JSON_FILENAME = "jsonData.json";
+    final private String STATS_LINK = "Harigo-21704/stats";
     private JsonParser jsonParser;
     private URLConnection connection;
 
-    private void initialize() throws IOException {
-        establishConnection();
-        jsonParser = new JsonParser();
+    public File getDatafile(String link) throws IOException {
+        if (fileIsAvailable(link + ".json")) return new File(link + ".json");
+        return writeJsonToFile(link + ".json",getJsonDataByLink(link));
     }
 
-    public File getData() throws IOException {
-        if (fileIsAvailable(JSON_FILENAME)) return new File(JSON_FILENAME);
-        return writeJsonToFile(JSON_FILENAME,getJsonData());
-    }
-
-    public JsonObject getJsonData() throws IOException {
-        initialize();
+    public JsonObject getJsonDataByLink(String link) throws IOException {
+        establishConnection(link);
         connection.connect();
+        jsonParser = new JsonParser();
         JsonElement root = jsonParser.parse(new InputStreamReader((InputStream) connection.getContent()));
         return root.getAsJsonObject();
     }
 
-    public void establishConnection() throws IOException {
-        URL url = new URL(BASE_ADDRESS + "Harigo-21704/stats");
+    public void establishConnection(String link) throws IOException {
+        URL url = new URL(BASE_ADDRESS + link);
         connection = url.openConnection();
         connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 " +
                 "(KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
